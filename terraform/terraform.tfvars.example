@@ -1,0 +1,10 @@
+# Copie ce fichier en terraform.tfvars et renseigne tes valeurs.
+# terraform.tfvars est ignoré par git (.gitignore) — n'y mets jamais de secret versionné.
+
+admin_cidr = "203.0.113.4/32" # <-- remplace par TON IP publique /32 (https://ifconfig.me)
+key_name   = "lab-key"        # <-- nom de ta paire de clés EC2 dans la région
+
+# Optionnel (valeurs par défaut sinon) :
+# aws_region        = "eu-west-3"
+# availability_zone = "eu-west-3a"
+# instance_type     = "t3.micro"

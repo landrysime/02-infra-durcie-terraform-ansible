@@ -1,0 +1,9 @@
+---
+# Durcissement CIS — appliqué aux 2 zones
+- name: Durcissement de base + pare-feu + journalisation
+  hosts: all
+  become: true
+  roles:
+    - hardening-base    # SSH, mises à jour, sysctl, permissions fichiers sensibles
+    - firewall-rules    # ufw/nftables par zone
+    - audit-logging     # auditd + journalisation

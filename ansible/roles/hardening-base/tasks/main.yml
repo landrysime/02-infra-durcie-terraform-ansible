@@ -1,0 +1,13 @@
+---
+# Chaque tâche référence sa règle CIS (objectif : 15 à 20 règles)
+
+# CIS 5.2.x — SSH
+- name: "CIS 5.2.x — Interdire la connexion root en SSH"
+  lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: '^#?PermitRootLogin'
+    line: 'PermitRootLogin no'
+  notify: restart sshd
+
+# TODO : désactiver l'auth par mot de passe, MaxAuthTries, mises à jour auto,
+# sysctl réseau, permissions /etc/passwd & /etc/shadow, services inutiles...

@@ -1,0 +1,16 @@
+---
+# Playbook principal — durcissement CIS des 2 zones
+# Usage :
+#   ansible-playbook site.yml                       (clé SSH)
+#   ansible-playbook site.yml --ask-pass --ask-become-pass   (mot de passe)
+#
+# Idempotence : relance le playbook, le 2e passage doit afficher "changed=0".
+
+- name: Durcissement CIS - base, pare-feu, journalisation d'audit
+  hosts: all
+  become: true
+
+  roles:
+    - role: hardening-base   # SSH, sysctl reseau, permissions, maj auto, PAM
+    - role: firewall-rules   # ufw : deny par defaut + regles par zone
+    - role: audit-logging    # auditd + journald persistant

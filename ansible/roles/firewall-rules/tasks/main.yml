@@ -1,0 +1,39 @@
+---
+# ============================================================
+# Role firewall-rules — pare-feu ufw par zone (CIS section 3.5)
+# DMZ     : 22 (SSH), 80/443 (web)
+# interne : 22 uniquement, et seulement depuis le reseau DMZ
+# ============================================================
+
+- name: "CIS 3.5.x - Installer ufw"
+  ansible.builtin.apt:
+    name: ufw
+    state: present
+    update_cache: true
+
+- name: "CIS 3.5.x - Politique par defaut : tout refuser en entree"
+  community.general.ufw:
+    direction: incoming
+    policy: deny
+
+- name: "CIS 3.5.x - Politique par defaut : autoriser la sortie"
+  community.general.ufw:
+    direction: outgoing
+    policy: allow
+
+- name: "CIS 3.5.x - Appliquer les regles autorisees de la zone"
+  community.general.ufw:
+    rule: "{{ item.rule }}"
+    port: "{{ item.port | default(omit) }}"
+    proto: "{{ item.proto | default(omit) }}"
+    from_ip: "{{ item.from_ip | default(omit) }}"
+    comment: "{{ item.comment | default(omit) }}"
+  loop: "{{ firewall_rules }}"
+
+- name: "CIS 3.5.x - Activer la journalisation du pare-feu"
+  community.general.ufw:
+    logging: "on"
+
+- name: "CIS 3.5.x - Activer ufw"
+  community.general.ufw:
+    state: enabled

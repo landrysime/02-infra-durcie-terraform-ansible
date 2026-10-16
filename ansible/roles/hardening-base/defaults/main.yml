@@ -1,0 +1,16 @@
+---
+# Valeurs par defaut du durcissement de base (surchargeable par host/group_vars)
+
+ssh_permit_root_login: "no"
+ssh_password_authentication: "no"   # passe a "yes" si tu n'as pas encore de cle SSH
+ssh_max_auth_tries: 4
+ssh_client_alive_interval: 300
+ssh_client_alive_count_max: 3
+ssh_login_grace_time: 60
+
+# Politique de mots de passe (pam_pwquality)
+pwquality_minlen: 14
+pwquality_dcredit: -1
+pwquality_ucredit: -1
+pwquality_ocredit: -1
+pwquality_lcredit: -1

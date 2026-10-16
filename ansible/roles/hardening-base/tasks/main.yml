@@ -1,0 +1,156 @@
+---
+# ============================================================
+# Role hardening-base — durcissement CIS Debian 12 (base)
+# Chaque tache reference sa regle CIS (numerotation CIS Debian 12 v1.x)
+# ============================================================
+
+# ---------- 1. Durcissement SSH (CIS section 5.1) ----------
+- name: "CIS 5.1.x - Interdire la connexion root en SSH"
+  ansible.builtin.lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: '^#?\s*PermitRootLogin'
+    line: "PermitRootLogin {{ ssh_permit_root_login }}"
+    validate: "sshd -t -f %s"
+  notify: restart sshd
+
+- name: "CIS 5.1.x - Desactiver l'authentification par mot de passe"
+  ansible.builtin.lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: '^#?\s*PasswordAuthentication'
+    line: "PasswordAuthentication {{ ssh_password_authentication }}"
+    validate: "sshd -t -f %s"
+  notify: restart sshd
+
+- name: "CIS 5.1.x - Limiter le nombre de tentatives d'authentification"
+  ansible.builtin.lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: '^#?\s*MaxAuthTries'
+    line: "MaxAuthTries {{ ssh_max_auth_tries }}"
+    validate: "sshd -t -f %s"
+  notify: restart sshd
+
+- name: "CIS 5.1.x - Interdire les mots de passe vides"
+  ansible.builtin.lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: '^#?\s*PermitEmptyPasswords'
+    line: "PermitEmptyPasswords no"
+    validate: "sshd -t -f %s"
+  notify: restart sshd
+
+- name: "CIS 5.1.x - Desactiver le transfert X11"
+  ansible.builtin.lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: '^#?\s*X11Forwarding'
+    line: "X11Forwarding no"
+    validate: "sshd -t -f %s"
+  notify: restart sshd
+
+- name: "CIS 5.1.x - Timeout d'inactivite SSH (ClientAlive)"
+  ansible.builtin.lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: "^#?\\s*{{ item.key }}"
+    line: "{{ item.key }} {{ item.value }}"
+    validate: "sshd -t -f %s"
+  loop:
+    - { key: "ClientAliveInterval", value: "{{ ssh_client_alive_interval }}" }
+    - { key: "ClientAliveCountMax", value: "{{ ssh_client_alive_count_max }}" }
+    - { key: "LoginGraceTime", value: "{{ ssh_login_grace_time }}" }
+  notify: restart sshd
+
+- name: "CIS 5.1.x - Banniere d'avertissement SSH"
+  ansible.builtin.lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: '^#?\s*Banner'
+    line: "Banner /etc/issue.net"
+    validate: "sshd -t -f %s"
+  notify: restart sshd
+
+- name: "CIS 1.7.x - Message d'avertissement legal (/etc/issue.net)"
+  ansible.builtin.copy:
+    dest: /etc/issue.net
+    content: "Acces reserve aux personnes autorisees. Toute activite est journalisee.\n"
+    owner: root
+    group: root
+    mode: "0644"
+
+# ---------- 2. Permissions des fichiers sensibles (CIS 6.1) ----------
+- name: "CIS 6.1.x - Permissions sur les fichiers de comptes"
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    owner: "{{ item.owner }}"
+    group: "{{ item.group }}"
+    mode: "{{ item.mode }}"
+  loop:
+    - { path: /etc/passwd, owner: root, group: root, mode: "0644" }
+    - { path: /etc/group, owner: root, group: root, mode: "0644" }
+    - { path: /etc/shadow, owner: root, group: shadow, mode: "0640" }
+    - { path: /etc/gshadow, owner: root, group: shadow, mode: "0640" }
+    - { path: /etc/ssh/sshd_config, owner: root, group: root, mode: "0600" }
+
+# ---------- 3. Parametres reseau noyau (CIS section 3.3) ----------
+- name: "CIS 3.3.x - Durcissement reseau via sysctl"
+  ansible.posix.sysctl:
+    name: "{{ item.name }}"
+    value: "{{ item.value }}"
+    state: present
+    sysctl_file: /etc/sysctl.d/99-cis-hardening.conf
+    reload: true
+  loop:
+    - { name: net.ipv4.conf.all.send_redirects, value: "0" }       # CIS 3.3.1
+    - { name: net.ipv4.conf.default.send_redirects, value: "0" }   # CIS 3.3.1
+    - { name: net.ipv4.conf.all.accept_redirects, value: "0" }     # CIS 3.3.5
+    - { name: net.ipv4.conf.all.accept_source_route, value: "0" }  # CIS 3.3.4
+    - { name: net.ipv4.conf.all.log_martians, value: "1" }         # CIS 3.3.6
+    - { name: net.ipv4.icmp_echo_ignore_broadcasts, value: "1" }   # CIS 3.3.7
+    - { name: net.ipv4.tcp_syncookies, value: "1" }                # CIS 3.3.9
+    - { name: net.ipv4.conf.all.rp_filter, value: "1" }            # CIS 3.3.8
+
+# ---------- 4. Mises a jour de securite automatiques (CIS 1.2) ----------
+- name: "CIS 1.2.x - Installer unattended-upgrades"
+  ansible.builtin.apt:
+    name: unattended-upgrades
+    state: present
+    update_cache: true
+
+- name: "CIS 1.2.x - Activer les mises a jour de securite automatiques"
+  ansible.builtin.copy:
+    dest: /etc/apt/apt.conf.d/20auto-upgrades
+    content: |
+      APT::Periodic::Update-Package-Lists "1";
+      APT::Periodic::Unattended-Upgrade "1";
+    owner: root
+    group: root
+    mode: "0644"
+
+# ---------- 5. Politique de mots de passe (CIS section 5.3) ----------
+- name: "CIS 5.3.1 - Installer libpam-pwquality"
+  ansible.builtin.apt:
+    name: libpam-pwquality
+    state: present
+
+- name: "CIS 5.3.1 - Exigences de complexite des mots de passe"
+  ansible.builtin.lineinfile:
+    path: /etc/security/pwquality.conf
+    regexp: "^#?\\s*{{ item.key }}"
+    line: "{{ item.key }} = {{ item.value }}"
+  loop:
+    - { key: minlen, value: "{{ pwquality_minlen }}" }
+    - { key: dcredit, value: "{{ pwquality_dcredit }}" }
+    - { key: ucredit, value: "{{ pwquality_ucredit }}" }
+    - { key: ocredit, value: "{{ pwquality_ocredit }}" }
+    - { key: lcredit, value: "{{ pwquality_lcredit }}" }
+
+# ---------- 6. Systemes de fichiers inutiles (CIS section 1.1.1) ----------
+- name: "CIS 1.1.1.x - Desactiver les systemes de fichiers inutiles"
+  ansible.builtin.copy:
+    dest: /etc/modprobe.d/cis-blacklist.conf
+    content: |
+      install cramfs /bin/true
+      install freevxfs /bin/true
+      install jffs2 /bin/true
+      install hfs /bin/true
+      install hfsplus /bin/true
+      install udf /bin/true
+    owner: root
+    group: root
+    mode: "0644"

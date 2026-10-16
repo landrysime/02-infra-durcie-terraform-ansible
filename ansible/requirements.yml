@@ -1,0 +1,7 @@
+---
+# Collections Ansible requises.
+# Installe-les avant de lancer le playbook :
+#   ansible-galaxy collection install -r requirements.yml
+collections:
+  - name: community.general   # module ufw
+  - name: ansible.posix       # module sysctl

@@ -1,0 +1,7 @@
+---
+# Zone interne : SSH autorise UNIQUEMENT depuis le reseau DMZ (segmentation)
+# Adapte le sous-reseau DMZ a ton lab Hyper-V.
+dmz_subnet: "192.168.100.0/24"
+
+firewall_rules:
+  - { rule: allow, port: "22", proto: tcp, from_ip: "{{ dmz_subnet }}", comment: "SSH depuis DMZ uniquement" }

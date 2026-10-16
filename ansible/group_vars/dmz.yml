@@ -1,0 +1,6 @@
+---
+# Zone DMZ (bastion) : SSH + web exposes
+firewall_rules:
+  - { rule: allow, port: "22", proto: tcp, comment: "SSH admin" }
+  - { rule: allow, port: "80", proto: tcp, comment: "HTTP" }
+  - { rule: allow, port: "443", proto: tcp, comment: "HTTPS" }

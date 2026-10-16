@@ -1,0 +1,5 @@
+---
+# Regles de pare-feu par defaut (surchargees par group_vars/dmz.yml et interne.yml)
+# Format : liste de regles ufw.
+firewall_rules:
+  - { rule: allow, port: "22", proto: tcp, comment: "SSH" }

@@ -1,0 +1,12 @@
+# Lynis — scores AVANT durcissement (baseline)
+# Lynis 3.1.4 — 259 tests — 2026-10-28
+
+bastion (192.168.100.10, DMZ)      Hardening index : 64 / 100
+interne (192.168.100.30, debian-cible)  Hardening index : 68 / 100
+
+Composants notables (avant) :
+- Firewall        : [V] present (mais regles non durcies)
+- Malware scanner : [X] absent
+
+Note : rapports Lynis complets de chaque VM a deposer ici
+       (lynis-before-bastion.txt / lynis-before-interne.txt).

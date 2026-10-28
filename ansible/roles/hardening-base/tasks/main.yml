@@ -88,22 +88,27 @@
     - { path: /etc/ssh/sshd_config, owner: root, group: root, mode: "0600" }
 
 # ---------- 3. Parametres reseau noyau (CIS section 3.3) ----------
-- name: "CIS 3.3.x - Durcissement reseau via sysctl"
-  ansible.posix.sysctl:
-    name: "{{ item.name }}"
-    value: "{{ item.value }}"
-    state: present
-    sysctl_file: /etc/sysctl.d/99-cis-hardening.conf
-    reload: true
-  loop:
-    - { name: net.ipv4.conf.all.send_redirects, value: "0" }       # CIS 3.3.1
-    - { name: net.ipv4.conf.default.send_redirects, value: "0" }   # CIS 3.3.1
-    - { name: net.ipv4.conf.all.accept_redirects, value: "0" }     # CIS 3.3.5
-    - { name: net.ipv4.conf.all.accept_source_route, value: "0" }  # CIS 3.3.4
-    - { name: net.ipv4.conf.all.log_martians, value: "1" }         # CIS 3.3.6
-    - { name: net.ipv4.icmp_echo_ignore_broadcasts, value: "1" }   # CIS 3.3.7
-    - { name: net.ipv4.tcp_syncookies, value: "1" }                # CIS 3.3.9
-    - { name: net.ipv4.conf.all.rp_filter, value: "1" }            # CIS 3.3.8
+# On ecrit un fichier de conf (idempotent au caractere pres) puis on recharge.
+# Evite le faux "changed" recurrent du module sysctl sur les cles conf.all.*
+- name: "CIS 3.3.x - Durcissement reseau noyau (fichier sysctl)"
+  ansible.builtin.copy:
+    dest: /etc/sysctl.d/99-cis-hardening.conf
+    owner: root
+    group: root
+    mode: "0644"
+    content: |
+      # Durcissement reseau CIS Debian 12 (section 3.3) - gere par Ansible
+      net.ipv4.conf.all.send_redirects = 0
+      net.ipv4.conf.default.send_redirects = 0
+      net.ipv4.conf.all.accept_redirects = 0
+      net.ipv4.conf.default.accept_redirects = 0
+      net.ipv4.conf.all.accept_source_route = 0
+      net.ipv4.conf.all.log_martians = 1
+      net.ipv4.conf.default.log_martians = 1
+      net.ipv4.icmp_echo_ignore_broadcasts = 1
+      net.ipv4.tcp_syncookies = 1
+      net.ipv4.conf.all.rp_filter = 1
+  notify: reload sysctl
 
 # ---------- 4. Mises a jour de securite automatiques (CIS 1.2) ----------
 - name: "CIS 1.2.x - Installer unattended-upgrades"

@@ -7,7 +7,7 @@ Procédure complète et reproductible : un tiers doit pouvoir rejouer le lab de 
 | VM | Rôle | Zone | IP (exemple) |
 |---|---|---|---|
 | `bastion` | Point d'entrée, exposé | DMZ | 192.168.100.10 |
-| `interne` | Serveur protégé | interne | 192.168.100.20 |
+| `interne` | Serveur protégé | interne | 192.168.100.30 |
 
 - Les 2 VM sont sur un **commutateur virtuel interne** Hyper-V `Lab-Durcissement` (réseau `192.168.100.0/24`).
 - **Segmentation visée :** le bastion est joignable en SSH depuis le poste d'admin ; le serveur interne n'accepte le SSH **que depuis le réseau de la DMZ**.
@@ -16,7 +16,7 @@ Procédure complète et reproductible : un tiers doit pouvoir rejouer le lab de 
 
 1. Crée 2 VM **Debian 12** (génération 2, 2 Go RAM, 1 vCPU suffisent).
 2. Rattache-les au commutateur interne `Lab-Durcissement`.
-3. Donne-leur une IP fixe (`192.168.100.10` et `.20`), même sous-réseau.
+3. Donne-leur une IP fixe (`192.168.100.10` et `.30`), même sous-réseau.
 4. À l'installation, crée ton utilisateur (ex. `styve`) et installe le serveur SSH :
    ```bash
    sudo apt update && sudo apt install -y openssh-server sudo
@@ -84,19 +84,19 @@ Objectif : **prouver** que la segmentation marche. Fais des captures d'écran.
 **Flux autorisé** (depuis le bastion vers l'interne, port 22) :
 ```bash
 # sur le bastion
-nc -zv 192.168.100.20 22     # doit REUSSIR (succeeded)
+nc -zv 192.168.100.30 22     # doit REUSSIR (succeeded)
 ```
 
 **Flux bloqué** (depuis une machine hors DMZ vers l'interne) :
 ```bash
 # depuis ton poste (hors sous-reseau DMZ) ou une 3e machine
-nmap -p 22 192.168.100.20    # le port doit apparaitre filtered/closed
-nc -zv 192.168.100.20 22     # doit ECHOUER (timed out / refused)
+nmap -p 22 192.168.100.30    # le port doit apparaitre filtered/closed
+nc -zv 192.168.100.30 22     # doit ECHOUER (timed out / refused)
 ```
 
 **Web sur le bastion** (si tu exposes un service) :
 ```bash
-curl -I http://192.168.100.10   # repond ; curl http://192.168.100.20 depuis l'exterieur doit echouer
+curl -I http://192.168.100.10   # repond ; curl http://192.168.100.30 depuis l'exterieur doit echouer
 ```
 
 ## 7. Règles CIS appliquées (extrait)

@@ -4,6 +4,8 @@ Durcissement automatisé de serveurs Linux selon le **CIS Benchmark**, dans une 
 
 **Stack :** Ansible · ufw · auditd · Lynis · Hyper-V · Debian 12 · (+ Terraform AWS en bonus IaC)
 
+📄 **[Rapport complet illustré (PDF)](docs/Rapport-Projet02-Infra-Durcie.pdf)** · 🗺️ **[Schéma d'architecture (draw.io)](docs/architecture-projet02.drawio)**
+
 ---
 
 ## 🎯 Contexte

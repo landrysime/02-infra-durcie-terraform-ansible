@@ -1,0 +1,107 @@
+<mxfile host="app.diagrams.net" modified="2026-10-28T16:12:00.000Z" agent="Claude" version="24.0.0" type="device">
+  <diagram id="p02-infra-durcie" name="Architecture Projet 02">
+    <mxGraphModel dx="1100" dy="760" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <!-- Title -->
+        <mxCell id="title" value="Projet 02 — Infrastructure durcie : segmentation DMZ / zone interne" style="text;html=1;align=center;verticalAlign=middle;fontStyle=1;fontSize=18;fontColor=#1F3864;" vertex="1" parent="1">
+          <mxGeometry x="90" y="20" width="670" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="subtitle" value="Durcissement CIS automatisé (Ansible) · pare-feu ufw par zone · Hyper-V" style="text;html=1;align=center;verticalAlign=middle;fontStyle=2;fontSize=12;fontColor=#595959;" vertex="1" parent="1">
+          <mxGeometry x="90" y="48" width="670" height="20" as="geometry" />
+        </mxCell>
+
+        <!-- Internet / poste admin -->
+        <mxCell id="internet" value="Internet / Poste d'administration" style="shape=cloud;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="320" y="90" width="220" height="90" as="geometry" />
+        </mxCell>
+
+        <!-- NAT switch -->
+        <mxCell id="nat" value="NAT — Default Switch (Hyper-V)&#10;accès sortant uniquement" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="330" y="210" width="200" height="50" as="geometry" />
+        </mxCell>
+
+        <!-- DMZ zone container -->
+        <mxCell id="dmz" value="ZONE DMZ" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fde9e9;strokeColor=#b85450;dashed=1;verticalAlign=top;fontStyle=1;fontSize=13;fontColor=#b85450;align=left;spacingLeft=12;spacingTop=6;" vertex="1" parent="1">
+          <mxGeometry x="140" y="300" width="570" height="150" as="geometry" />
+        </mxCell>
+        <!-- Bastion -->
+        <mxCell id="bastion" value="BASTION (point de rebond)&#10;&#10;192.168.100.10&#10;2 cartes réseau (dual-homed)&#10;+ poste de pilotage Ansible" style="shape=mxgraph.rack.general.1u_server;html=1;whiteSpace=wrap;fillColor=#f8cecc;strokeColor=#b85450;fontSize=11;fontStyle=0;verticalAlign=middle;align=center;" vertex="1" parent="1">
+          <mxGeometry x="300" y="330" width="250" height="100" as="geometry" />
+        </mxCell>
+        <!-- ufw bastion note -->
+        <mxCell id="ufwbastion" value="ufw (deny par défaut)&#10;ALLOW 22 / 80 / 443" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#b85450;fontSize=10;dashed=1;" vertex="1" parent="1">
+          <mxGeometry x="160" y="355" width="120" height="50" as="geometry" />
+        </mxCell>
+
+        <!-- LAN-Interne switch -->
+        <mxCell id="lan" value="Commutateur INTERNE (Hyper-V) — LAN-Interne&#10;192.168.100.0/24  (isolé, sans accès Internet direct)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="200" y="500" width="450" height="50" as="geometry" />
+        </mxCell>
+
+        <!-- Interne zone container -->
+        <mxCell id="intzone" value="ZONE INTERNE (protégée)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#eef7ea;strokeColor=#82b366;dashed=1;verticalAlign=top;fontStyle=1;fontSize=13;fontColor=#4f7942;align=left;spacingLeft=12;spacingTop=6;" vertex="1" parent="1">
+          <mxGeometry x="140" y="600" width="570" height="150" as="geometry" />
+        </mxCell>
+        <!-- Interne server -->
+        <mxCell id="interne" value="SERVEUR INTERNE (durci)&#10;&#10;192.168.100.30&#10;1 carte réseau — isolé" style="shape=mxgraph.rack.general.1u_server;html=1;whiteSpace=wrap;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;verticalAlign=middle;align=center;" vertex="1" parent="1">
+          <mxGeometry x="300" y="630" width="250" height="90" as="geometry" />
+        </mxCell>
+        <!-- ufw interne note -->
+        <mxCell id="ufwinterne" value="ufw (deny par défaut)&#10;ALLOW 22 depuis&#10;192.168.100.0/24 UNIQUEMENT" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#82b366;fontSize=10;dashed=1;" vertex="1" parent="1">
+          <mxGeometry x="575" y="645" width="120" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- Edges -->
+        <mxCell id="e1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=classic;strokeColor=#6c8ebf;strokeWidth=2;" edge="1" parent="1" source="internet" target="nat">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e2" value="carte 2 (NAT)" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=classic;strokeColor=#d6b656;strokeWidth=2;fontSize=10;" edge="1" parent="1" source="nat" target="bastion">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e3" value="carte 1 (LAN-Interne)" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=classic;strokeColor=#82b366;strokeWidth=2;fontSize=10;" edge="1" parent="1" source="bastion" target="lan">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e4" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=classic;strokeColor=#82b366;strokeWidth=2;" edge="1" parent="1" source="lan" target="interne">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Allowed flow -->
+        <mxCell id="flowok" value="FLUX AUTORISÉ&#10;SSH 22 (bastion → interne)&#10;nc -zv 192.168.100.30 22 ✔" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=classic;strokeColor=#2E7D32;strokeWidth=3;fontSize=10;fontColor=#2E7D32;fontStyle=1;dashed=0;exitX=0.25;exitY=1;exitDx=0;exitDy=0;entryX=0.25;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="bastion" target="interne">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="250" y="470" />
+              <mxPoint x="250" y="590" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <!-- Blocked flow -->
+        <mxCell id="flowko" value="FLUX BLOQUÉ&#10;port 80 / autres (timeout)&#10;nmap -Pn → seul 22 ouvert ✘" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=cross;startArrow=none;strokeColor=#C62828;strokeWidth=3;fontSize=10;fontColor=#C62828;fontStyle=1;dashed=1;exitX=0.75;exitY=1;exitDx=0;exitDy=0;entryX=0.75;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="bastion" target="interne">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="600" y="470" />
+              <mxPoint x="600" y="590" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Legend -->
+        <mxCell id="legendbox" value="Légende" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#999999;verticalAlign=top;fontStyle=1;fontSize=11;align=left;spacingLeft=8;spacingTop=4;" vertex="1" parent="1">
+          <mxGeometry x="140" y="790" width="570" height="110" as="geometry" />
+        </mxCell>
+        <mxCell id="lg1" value="— Flux autorisé (SSH depuis la DMZ)" style="text;html=1;align=left;fontSize=11;fontColor=#2E7D32;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="160" y="818" width="300" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="lg2" value="--- Flux bloqué (tout le reste, deny par défaut)" style="text;html=1;align=left;fontSize=11;fontColor=#C62828;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="160" y="840" width="320" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="lg3" value="Segmentation = commutateur interne Hyper-V isolé + ufw par zone (host-based, piloté par Ansible). Le serveur interne n'est joignable qu'en SSH depuis le réseau de la DMZ ; il n'a aucun accès Internet entrant." style="text;html=1;align=left;fontSize=10;fontColor=#333333;whiteSpace=wrap;" vertex="1" parent="1">
+          <mxGeometry x="160" y="862" width="535" height="34" as="geometry" />
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

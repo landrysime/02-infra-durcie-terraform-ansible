@@ -10,6 +10,17 @@ Durcissement automatisé de serveurs Linux selon le **CIS Benchmark**, dans une 
 
 Une entreprise migre son infrastructure, gérée manuellement, vers une approche **Infrastructure as Code**. Le RSSI exige une **segmentation réseau** (DMZ), un durcissement conforme à un **référentiel reconnu (CIS)**, et un **rapport de conformité chiffré** avant / après. Le durcissement doit être **reproductible** et **idempotent**.
 
+## 🔀 Pourquoi la démarche a évolué
+
+L'énoncé initial prévoyait un lab **AWS** avec un pare-feu **pfSense**. L'**objectif de sécurité a été tenu à 100 %**, mais 2 briques techniques ont été remplacées par des équivalents, pour des **contraintes réelles assumées** — un réflexe de terrain : on garde l'objectif, on adapte l'outil.
+
+| Virage | Pourquoi | Solution retenue |
+|---|---|---|
+| **AWS → Hyper-V** | Le compte AWS « Free Plan » **interdit EC2** (Service Control Policy) ; l'upgrade exigeait une **carte bancaire**, volontairement non fournie (maîtrise du risque de facturation). | Lab réalisé sur **Hyper-V** (local, gratuit). Le code **Terraform est conservé et validé** (`terraform plan`) comme preuve de la compétence IaC cloud. |
+| **pfSense → ufw par zone** | Plus assez de **ressources sur le poste** pour une 3ᵉ VM pfSense. | Segmentation par **commutateur interne Hyper-V** + filtrage **`ufw` par zone piloté par Ansible** (host-based, **as-code et idempotent**). |
+
+**Bénéfice :** le pare-feu devient du **code versionné** (cohérent avec l'esprit IaC), et la segmentation reste **prouvée par tests de flux**. Détail complet du cheminement prévu → réalisé dans **[`docs/REALISATION.md`](docs/REALISATION.md)**.
+
 ## 🧱 Architecture
 
 ```
@@ -47,6 +58,7 @@ ansible/
     firewall-rules/             # ufw : deny par défaut + règles par zone
     audit-logging/              # auditd + règles CIS + journald persistant
 docs/
+  REALISATION.md                # énoncé → réalisé : pourquoi la démarche a évolué
   GUIDE-LAB.md                  # procédure complète A→Z (reproductible)
   score-comparison.md           # delta Lynis détaillé
 reports/
